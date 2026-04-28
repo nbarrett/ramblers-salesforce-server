@@ -7,7 +7,7 @@ primary_region = "lhr"
 [env]
   NODE_ENV = "production"
   PORT = "8080"
-  PUBLIC_BASE_URL = "https://ramblers-salesforce-server.fly.dev"
+  PUBLIC_BASE_URL = "https://salesforce-server.ngx-ramblers.org.uk"
 
 [http_service]
   internal_port = 8080

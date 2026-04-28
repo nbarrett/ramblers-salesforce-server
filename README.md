@@ -1,6 +1,6 @@
 # ramblers-salesforce-server
 
-Production server for the Ramblers Salesforce API. Live at [`ramblers-salesforce-server.fly.dev`](https://ramblers-salesforce-server.fly.dev). Wire format comes from [`@ramblers/sf-contract`](https://github.com/nbarrett/ramblers-salesforce-contract). Companion to [`ramblers-salesforce-mock`](https://github.com/nbarrett/ramblers-salesforce-mock).
+Production server for the Ramblers Salesforce API. Live at [`salesforce-server.ngx-ramblers.org.uk`](https://salesforce-server.ngx-ramblers.org.uk). Wire format comes from [`@ramblers/sf-contract`](https://github.com/nbarrett/ramblers-salesforce-contract). Companion to [`ramblers-salesforce-mock`](https://github.com/nbarrett/ramblers-salesforce-mock).
 
 > **If you're Ramblers HQ:** the structural plumbing is done. Five concrete functions remain — see the checklist in [#1](https://github.com/nbarrett/ramblers-salesforce-server/issues/1). Once `SF_CLIENT_ID`, `SF_USERNAME`, `SF_JWT_PRIVATE_KEY_PATH`, `API_TOKEN_HASHES` and `ALLOWED_GROUP_CODES` are set as Fly secrets and the five function bodies are filled in, the server returns real Salesforce data instead of `501 NotImplemented` envelopes.
 
@@ -14,7 +14,7 @@ Scaffolded. The `SalesforceMemberProvider` is wired through to the routes; every
 |---|---|---|
 | [`ramblers-salesforce-contract`](https://github.com/nbarrett/ramblers-salesforce-contract) | Shared wire-format package — types, Zod schemas, OpenAPI builder, error envelope, columns, port. | git tag `v0.2.0` |
 | [`ramblers-salesforce-mock`](https://github.com/nbarrett/ramblers-salesforce-mock) | Mongo-backed development server with admin SPA, xlsx ingest, synthetic data. | [salesforce-mock.ngx-ramblers.org.uk](https://salesforce-mock.ngx-ramblers.org.uk) |
-| **`ramblers-salesforce-server`** (this repo) | Salesforce-backed production server. | [ramblers-salesforce-server.fly.dev](https://ramblers-salesforce-server.fly.dev) |
+| **`ramblers-salesforce-server`** (this repo) | Salesforce-backed production server. | [salesforce-server.ngx-ramblers.org.uk](https://salesforce-server.ngx-ramblers.org.uk) |
 
 The mock and this server present the byte-identical wire format because both depend on the same contract package. Consumers (NGX-Ramblers, MailMan) point at whichever URL fits their environment.
 
