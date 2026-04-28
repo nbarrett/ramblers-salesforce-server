@@ -52,9 +52,7 @@ export async function createApp(): Promise<express.Express> {
       "Mounting members.router without a Salesforce connection - every call will throw NotImplemented or fail at the connection layer.",
     );
   }
-  const provider = new SalesforceMemberProvider(
-    salesforce ?? ({ conn: undefined as unknown, identity: async () => { throw new Error("No Salesforce connection"); } } as unknown as SalesforceConnection),
-  );
+  const provider = new SalesforceMemberProvider(salesforce);
   app.use(createApiRouter(provider));
 
   app.get("/", (_req: Request, res: Response) => {

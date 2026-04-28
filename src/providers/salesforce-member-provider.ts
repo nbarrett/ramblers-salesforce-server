@@ -9,13 +9,15 @@ import type {
 import type { SalesforceConnection } from "../salesforce/connection.js";
 
 export class SalesforceMemberProvider implements MemberProvider {
-  constructor(private readonly conn: SalesforceConnection) {}
+  constructor(private readonly conn: SalesforceConnection | undefined) {}
 
   async listMembers(_options: ListMembersOptions): Promise<ListMembersResult> {
     void this.conn;
     throw new NotImplemented("SalesforceMemberProvider.listMembers", [
       "Phase 4 (Ramblers HQ): write the SOQL query to fetch Contacts (or Member__c)",
       "for the given groupCode, then map each record through salesforceToMember().",
+      "When this body is filled in, throw a clear error if this.conn is undefined,",
+      "since a missing connection means the server is misconfigured.",
     ]);
   }
 
