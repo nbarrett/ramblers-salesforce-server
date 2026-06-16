@@ -1,0 +1,7 @@
+azure-data-tables==12.5.0
+azure-functions==1.21.3
+fastapi==0.115.6
+pydantic==2.10.4
+pyjwt[crypto]==2.10.1
+simple-salesforce==1.12.6
+uvicorn==0.34.0

@@ -1,0 +1,20 @@
+[project]
+name = "ramblers-salesforce-server-python"
+version = "0.4.0"
+description = "Python / FastAPI / Azure Functions reference implementation of the Ramblers Salesforce member API (ngx-ramblers#209)."
+requires-python = ">=3.9"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
