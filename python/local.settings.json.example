@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "PROVIDER": "demo",
+    "DEMO_GROUP_CODE": "KT50",
+    "AUTH_MODE": "none",
+    "ALLOWED_GROUP_CODES": "KT50",
+    "API_TOKEN_HASHES": "",
+    "ENTRA_TENANT_ID": "",
+    "ENTRA_AUDIENCE": "",
+    "OVERLAY_CONNECTION_STRING": "",
+    "OVERLAY_TABLE_NAME": "memberoverlay",
+    "PUBLIC_BASE_URL": "http://localhost:7071"
+  }
+}

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -d ".git" ]; then
+if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
   exit 0
 fi
 

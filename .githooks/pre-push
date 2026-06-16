@@ -2,19 +2,16 @@
 
 set -e
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(git rev-parse --show-toplevel)"
 
-cd "$ROOT_DIR"
+echo "Pre-push: TypeScript checks..."
+(cd "$ROOT/typescript" && pnpm --silent typecheck && pnpm --silent lint && pnpm --silent test)
 
-echo "Running pre-push checks..."
-
-echo "  → typecheck"
-pnpm --silent typecheck
-
-echo "  → lint"
-pnpm --silent lint
-
-echo "  → tests"
-pnpm --silent test
+if [ -x "$ROOT/python/.venv/bin/python" ]; then
+  echo "Pre-push: Python checks..."
+  (cd "$ROOT/python" && "$ROOT/python/.venv/bin/ruff" check . && "$ROOT/python/.venv/bin/python" -m pytest -q)
+else
+  echo "Pre-push: python/.venv not found - skipping Python checks (create it per python/README.md)"
+fi
 
 echo "Pre-push checks passed!"

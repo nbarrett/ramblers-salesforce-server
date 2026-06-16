@@ -2,25 +2,74 @@ name: Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Which server to deploy
+        type: choice
+        options:
+          - python
+          - typescript
+        default: python
   push:
     branches:
       - main
-    paths:
-      - "src/**"
-      - "scripts/**"
-      - "Dockerfile"
-      - "fly.toml"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - ".github/workflows/deploy.yml"
 
 concurrency:
   group: deploy
   cancel-in-progress: false
 
 jobs:
-  test:
+  resolve:
     runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.pick.outputs.target }}
+    steps:
+      - id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "target=${{ inputs.target }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=${{ vars.DEFAULT_DEPLOY_TARGET || 'python' }}" >> "$GITHUB_OUTPUT"
+          fi
+
+  python:
+    needs: resolve
+    if: needs.resolve.outputs.target == 'python'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: pytest -q
+      - if: ${{ vars.AZURE_DEPLOY_ENABLED == 'true' }}
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - if: ${{ vars.AZURE_DEPLOY_ENABLED == 'true' }}
+        name: Build image on the runner, push to ACR, update the Container App
+        run: |
+          az extension add --name containerapp --only-show-errors
+          IMAGE="${{ vars.AZURE_ACR_NAME }}.azurecr.io/ramblers-sf-py:${{ github.sha }}"
+          az acr login --name "${{ vars.AZURE_ACR_NAME }}"
+          docker build --platform linux/amd64 -t "$IMAGE" .
+          docker push "$IMAGE"
+          az containerapp update -n "${{ vars.AZURE_CONTAINERAPP_NAME }}" -g "${{ vars.AZURE_RESOURCE_GROUP }}" --image "$IMAGE"
+      - if: ${{ vars.AZURE_DEPLOY_ENABLED != 'true' }}
+        run: echo "AZURE_DEPLOY_ENABLED is not 'true' - validated (ruff + pytest) but not deployed. Run python/infra/azure-setup.sh to provision and set the deploy secrets."
+
+  typescript:
+    needs: resolve
+    if: needs.resolve.outputs.target == 'typescript'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: typescript
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v5
@@ -28,19 +77,17 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
+          cache-dependency-path: typescript/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm build
       - run: pnpm test
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    if: ${{ vars.FLY_DEPLOY_ENABLED == 'true' }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
+      - if: ${{ vars.FLY_DEPLOY_ENABLED == 'true' }}
+        uses: superfly/flyctl-actions/setup-flyctl@master
+      - if: ${{ vars.FLY_DEPLOY_ENABLED == 'true' }}
+        run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - if: ${{ vars.FLY_DEPLOY_ENABLED != 'true' }}
+        run: echo "FLY_DEPLOY_ENABLED is not 'true' - validated but not published."
