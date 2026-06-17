@@ -1,7 +1,11 @@
 """Builds the MemberProvider from configuration.
 
-demo  -> synthetic members + in-memory overlay (runs with no Salesforce, no DB)
-salesforce -> Salesforce source + Azure Table overlay (production)
+The data source and the overlay store are chosen independently:
+  source  -> synthetic (PROVIDER=demo) or Salesforce (PROVIDER=salesforce)
+  overlay -> Azure Table when OVERLAY_CONNECTION_STRING is set, else in-memory
+
+So the overlay can persist to a real Azure Table even with the demo source - the
+extension fields it owns live outside Salesforce regardless of the source.
 """
 
 from __future__ import annotations
@@ -17,16 +21,15 @@ from .sources.synthetic import SyntheticMemberSource
 
 
 def build_provider() -> MemberProvider:
+    source: MemberSource
     if config.provider == "demo":
-        source: MemberSource = SyntheticMemberSource(group_code=config.demo_group_code)
-        overlay: OverlayStore = InMemoryOverlayStore()
+        source = SyntheticMemberSource(group_code=config.demo_group_code)
     else:
         source = SalesforceMemberSource()
-        overlay = _production_overlay()
-    return HybridMemberProvider(source, overlay)
+    return HybridMemberProvider(source, build_overlay())
 
 
-def _production_overlay() -> OverlayStore:
+def build_overlay() -> OverlayStore:
     if config.overlay_connection_string:
         from .overlay.azure_table import AzureTableOverlayStore
 
