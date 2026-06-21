@@ -12,6 +12,6 @@
     "ENTRA_AUDIENCE": "",
     "OVERLAY_CONNECTION_STRING": "",
     "OVERLAY_TABLE_NAME": "memberoverlay",
-    "PUBLIC_BASE_URL": "http://localhost:7071"
+    "PUBLIC_BASE_URL": "/"
   }
 }

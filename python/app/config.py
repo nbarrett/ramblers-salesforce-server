@@ -28,7 +28,7 @@ class Config:
         default_factory=lambda: os.environ.get("OVERLAY_TABLE_NAME", "memberoverlay")
     )
     public_base_url: str = field(
-        default_factory=lambda: os.environ.get("PUBLIC_BASE_URL", "http://localhost:7071")
+        default_factory=lambda: os.environ.get("PUBLIC_BASE_URL", "/")
     )
 
 
