@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 
 from fastapi import APIRouter, Depends, Path, Query
 
@@ -16,11 +16,29 @@ from ..member_provider import (
     ListMembersOptions,
     MemberProvider,
 )
-from ..models import ConsentUpdateRequest, ConsentUpdateResponse, MemberListResponse
+from ..models import (
+    ApiErrorResponse,
+    ConsentUpdateRequest,
+    ConsentUpdateResponse,
+    MemberListResponse,
+)
 
 router = APIRouter(dependencies=[Depends(require_auth)])
 
 provider: MemberProvider = build_provider()
+
+UNAUTHORISED: dict[int | str, dict[str, Any]] = {
+    401: {"model": ApiErrorResponse, "description": "Unauthorised"}
+}
+LIST_ERRORS: dict[int | str, dict[str, Any]] = {
+    **UNAUTHORISED,
+    404: {"model": ApiErrorResponse, "description": "Group not found"},
+}
+CONSENT_ERRORS: dict[int | str, dict[str, Any]] = {
+    400: {"model": ApiErrorResponse, "description": "Bad request"},
+    **UNAUTHORISED,
+    404: {"model": ApiErrorResponse, "description": "Member not found"},
+}
 
 
 def _authorise_group(group_code: str) -> None:
@@ -33,6 +51,7 @@ def _authorise_group(group_code: str) -> None:
     response_model=MemberListResponse,
     response_model_exclude_none=True,
     summary="List members for a group or area",
+    responses=LIST_ERRORS,
 )
 async def list_members(
     group_code: Annotated[str, Path(alias="groupCode")],
@@ -53,6 +72,7 @@ async def list_members(
     response_model=ConsentUpdateResponse,
     response_model_exclude_none=True,
     summary="Consent writeback",
+    responses=CONSENT_ERRORS,
 )
 async def apply_consent(
     membership_number: Annotated[str, Path(alias="membershipNumber")],
