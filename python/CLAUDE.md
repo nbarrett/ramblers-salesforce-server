@@ -43,4 +43,4 @@ func start                   # local Azure Functions host (needs Core Tools)
 
 ## Auth
 
-`AUTH_MODE=entra` (default) validates Entra ID JWTs (RS256) against the tenant JWKS, checking issuer + audience. `AUTH_MODE=token` compares a sha256 of the bearer token against `API_TOKEN_HASHES`, for local parity with the mock. Per-deployment access is the `ALLOWED_GROUP_CODES` allow-list (the per-client token model from #209).
+`AUTH_MODE=none` is the default (demo / local). `AUTH_MODE=entra` validates Entra ID JWTs (RS256) against the tenant JWKS, checking issuer + audience - the production mode for HQ. `AUTH_MODE=token` compares a sha256 of the bearer token against `API_TOKEN_HASHES`, for local parity with the mock. The bearer scheme is declared to OpenAPI via `HTTPBearer`, so `/docs` shows an Authorize button in every mode; the single Entra plug-in seam is `_verify_entra` in `app/auth.py`. Per-deployment access is the `ALLOWED_GROUP_CODES` allow-list (the per-client token model from #209).

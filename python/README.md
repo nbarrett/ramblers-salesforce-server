@@ -68,6 +68,42 @@ Chosen by `PROVIDER`:
 | `OVERLAY_CONNECTION_STRING` | - | Azure Storage connection string for the overlay (falls back to in-memory if unset) |
 | `ALLOWED_GROUP_CODES` | - | per-deployment group/area allow-list |
 
+## Authentication
+
+Inbound auth is chosen by `AUTH_MODE`, and the bearer scheme is declared to OpenAPI - so the Swagger UI at `/docs` always shows an **Authorize** button (matching the mock), whatever the mode:
+
+| `AUTH_MODE` | What it does |
+|---|---|
+| `none` (default) | Not enforced. The deployed demo runs here, so the live endpoints are open. The Authorize button still appears, to show consumers the production shape. |
+| `entra` | Validates a Microsoft **Entra ID** access token (JWT, RS256) against the tenant JWKS, checking issuer and audience. This is the app-to-app (OAuth2 client-credentials) shape Ramblers HQ run. |
+| `token` | sha256s an opaque bearer against the `API_TOKEN_HASHES` allow-list, for parity with the mock / TypeScript server. |
+
+### Plugging in Entra
+
+Entra is the production default for HQ, and switching it on is configuration, not code - **nothing in the routes changes**:
+
+1. In your Entra tenant, register an **API** app: expose it as `api://<api-app-id>`, and set its access-token version to v2.0 (so the issuer is `https://login.microsoftonline.com/<tenant>/v2.0`, which is what the server checks).
+2. Register a **consumer** app (one per consumer, e.g. NGX-Ramblers, MailMan) with a client secret, and grant it an application role on the API.
+3. Point the server at Entra:
+
+   ```bash
+   AUTH_MODE=entra
+   ENTRA_TENANT_ID=<your-tenant-id>
+   ENTRA_AUDIENCE=<the API app id>   # the aud claim the server requires
+   ```
+
+A consumer then fetches a token by client-credentials and calls the API with `Authorization: Bearer <token>`:
+
+```bash
+curl -X POST https://login.microsoftonline.com/<tenant>/oauth2/v2.0/token \
+  -d grant_type=client_credentials -d client_id=<consumer-app-id> \
+  --data-urlencode client_secret=<secret> \
+  --data-urlencode scope=api://<api-app-id>/.default
+# -> paste the returned access_token into the /docs Authorize box, or send it as a Bearer header
+```
+
+The single code seam is `_verify_entra` in [`app/auth.py`](app/auth.py); the only inputs HQ supply are the tenant id and the audience. On a Container App the two settings can be left in place permanently while `AUTH_MODE=none` (they are inert), so a deployment flips between open demo and enforced Entra by changing that one variable.
+
 ## Deploy to Azure
 
 The server runs on **Azure Container Apps**, live at [salesforce-server.ngx-ramblers.org.uk](https://salesforce-server.ngx-ramblers.org.uk). A push to `main` has GitHub Actions build the image on the runner, push it to the container registry, and update the Container App (needs the `AZURE_DEPLOY_ENABLED` variable and the `AZURE_CREDENTIALS` secret).
@@ -85,7 +121,7 @@ The same FastAPI app also runs unchanged on the **Azure Functions** Python v2 mo
 ```bash
 ruff check .   # lint
 mypy app       # types (strict)
-pytest         # conformance + hybrid + end-to-end API tests (14)
+pytest         # conformance + hybrid + end-to-end API tests (15)
 ```
 
 `pytest` includes a conformance suite asserting the generated OpenAPI carries the v0.4.0 contract field names and value vocabularies, so this server cannot quietly diverge from the spec or the TypeScript sibling.
