@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 #
+# SUPERSEDED: this provisions the original Azure Functions / App Service design
+# (main.bicep). The live server runs on Azure Container Apps, deployed by
+# .github/workflows/deploy.yml. A from-scratch Container Apps Bicep to replace
+# main.bicep is still outstanding (tracked in issue #2). For the pieces already
+# captured as code, see entra-setup.sh (Entra app registrations) and
+# keyvault-setup.sh (Key Vault for the Salesforce private key).
+#
 # One-shot Azure setup for the Python server. Run AFTER `az login` and `gh auth login`.
 #
 #   bash python/infra/azure-setup.sh [name] [location]
