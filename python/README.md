@@ -121,7 +121,7 @@ The same FastAPI app also runs unchanged on the **Azure Functions** Python v2 mo
 ```bash
 ruff check .   # lint
 mypy app       # types (strict)
-pytest         # conformance + hybrid + end-to-end API tests (15)
+pytest         # conformance + hybrid + end-to-end API tests (21)
 ```
 
 `pytest` includes a conformance suite asserting the generated OpenAPI carries the v0.4.0 contract field names and value vocabularies, so this server cannot quietly diverge from the spec or the TypeScript sibling.
