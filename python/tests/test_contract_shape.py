@@ -15,6 +15,17 @@ def _member_schema() -> dict:
     return app.openapi()["components"]["schemas"]["SalesforceMember"]
 
 
+def test_bearer_security_scheme_is_advertised() -> None:
+    spec = app.openapi()
+    schemes = spec["components"].get("securitySchemes", {})
+    assert "bearerAuth" in schemes, "Swagger needs a declared scheme to show Authorize"
+    assert schemes["bearerAuth"]["type"] == "http"
+    assert schemes["bearerAuth"]["scheme"] == "bearer"
+    assert schemes["bearerAuth"].get("bearerFormat") == "JWT"
+    post = spec["paths"]["/api/members/{membershipNumber}/consent"]["post"]
+    assert any("bearerAuth" in requirement for requirement in post.get("security", []))
+
+
 def test_paths_match_contract() -> None:
     paths = app.openapi()["paths"]
     assert "/api/groups/{groupCode}/members" in paths

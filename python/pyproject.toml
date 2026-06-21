@@ -12,7 +12,9 @@ target-version = "py39"
 select = ["E", "F", "I", "B"]
 
 [tool.mypy]
-python_version = "3.9"
+# Matches the deployment runtime (python:3.11-slim) and the CI runner, so mypy
+# does not flag 3.10+ syntax in installed dependencies (e.g. anyio's match).
+python_version = "3.11"
 strict = true
 ignore_missing_imports = true
 
