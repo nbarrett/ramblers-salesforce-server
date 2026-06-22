@@ -21,7 +21,7 @@ _FIRST = [
 _LAST = [
     "Ashworth", "Brook", "Clegg", "Dunmore", "Ellery", "Frost", "Gledhill",
     "Hargreave", "Ingham", "Jowett", "Kershaw", "Lomax", "Mottram", "Naylor",
-    " Otley".strip(), "Pickford", "Royle", "Sutcliffe", "Thwaite", "Unwin",
+    "Otley", "Pickford", "Royle", "Sutcliffe", "Thwaite", "Unwin",
 ]
 _POSTCODES = ["CT1 2AA", "CT2 7NZ", "ME13 7AA", "TN23 1AB", "CT5 3RP", "ME10 4QT"]
 _EPOCH = datetime(2026, 6, 1, tzinfo=timezone.utc)
